@@ -440,7 +440,7 @@ if(isset($_GET['mode'])) {
         $mode = $avelsieve_default_mode;
     }
 }
-    
+
 $ht = new avelsieve_html_rules($rules, $mode);
 if(!empty($errormsg)) {
     $ht->set_errmsg(array($errormsg));

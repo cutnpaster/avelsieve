@@ -320,6 +320,7 @@ function makesinglerule($rule, $mode='rule') {
 
     // imap4flags extension
     $actions = array();
+    $sieve = false;
     if (isset($rule['imapflags']) && isset($rule['imapflags']['flags'])) {
         include_once(SM_PATH . 'plugins/avelsieve/include/avelsieve_action_imapflags.class.php');
         // $sieve variable ??? FIXME
@@ -431,83 +432,85 @@ function makesinglerule($rule, $mode='rule') {
                 }
 
                 /* Kind of condition: Message */
-                switch($rule['cond'][$i]['type']) {
-                case 'address':
-                    $aTmp = build_rule_snippet('address', $rule['cond'][$i]['address'], $rule['cond'][$i]['matchtype'],
-                        $rule['cond'][$i]['addressmatch'], $argIndex, $argIndexLast);
-                    $out .= $aTmp[0];
-                    $text .= $aTmp[1];
-                    $terse .= $aTmp[2];
-                    break;
+                if (!empty($rule['cond'][$i]['type'])) {
+                    switch($rule['cond'][$i]['type']) {
+                        case 'address':
+                            $aTmp = build_rule_snippet('address', $rule['cond'][$i]['address'], $rule['cond'][$i]['matchtype'],
+                            $rule['cond'][$i]['addressmatch'], $argIndex, $argIndexLast);
+                            $out .= $aTmp[0];
+                            $text .= $aTmp[1];
+                            $terse .= $aTmp[2];
+                            break;
 
-                case 'envelope':
-                    $aTmp = build_rule_snippet('envelope', $rule['cond'][$i]['envelope'], $rule['cond'][$i]['matchtype'],
-                        $rule['cond'][$i]['envelopematch']);
-                    $out .= $aTmp[0];
-                    $text .= $aTmp[1];
-                    $terse .= $aTmp[2];
-                    break;
+                        case 'envelope':
+                            $aTmp = build_rule_snippet('envelope', $rule['cond'][$i]['envelope'], $rule['cond'][$i]['matchtype'],
+                            $rule['cond'][$i]['envelopematch']);
+                            $out .= $aTmp[0];
+                            $text .= $aTmp[1];
+                            $terse .= $aTmp[2];
+                            break;
 
-                case 'header':
-                    $aTmp = build_rule_snippet('header', $rule['cond'][$i]['header'], $rule['cond'][$i]['matchtype'],
-                        $rule['cond'][$i]['headermatch'], $argIndex, $argIndexLast);
-                    $out .= $aTmp[0];
-                    $text .= $aTmp[1];
-                    $terse .= $aTmp[2];
-                    break;
+                        case 'header':
+                            $aTmp = build_rule_snippet('header', $rule['cond'][$i]['header'], $rule['cond'][$i]['matchtype'],
+                            $rule['cond'][$i]['headermatch'], $argIndex, $argIndexLast);
+                            $out .= $aTmp[0];
+                            $text .= $aTmp[1];
+                            $terse .= $aTmp[2];
+                            break;
 
-                case 'size':
-                    $out .= 'size :';
-                    $text .= _("the size of the message is");
-                    $text .= "<em>";
-                    $terse .= _("Size");
+                        case 'size':
+                            $out .= 'size :';
+                            $text .= _("the size of the message is");
+                            $text .= "<em>";
+                            $terse .= _("Size");
                     
-                    if($rule['cond'][$i]['sizerel'] == "bigger") {
-                        $out .= "over ";
-                        $terse .= " > ";
-                        $text .= _(" bigger");
-                    } else {
-                        $out .= "under ";
-                        $terse .= " < ";
-                        $text .= _(" smaller");
-                    }
-                    $text .= " "._("than")." ". htmlspecialchars($rule['cond'][$i]['sizeamount']) .
-                        " ". htmlspecialchars($rule['cond'][$i]['sizeunit']) . "</em>, ";
-                    $terse .= $rule['cond'][$i]['sizeamount'];
-                    $out .= $rule['cond'][$i]['sizeamount'];
+                            if($rule['cond'][$i]['sizerel'] == "bigger") {
+                                $out .= "over ";
+                                $terse .= " > ";
+                                $text .= _(" bigger");
+                            } else {
+                                $out .= "under ";
+                                $terse .= " < ";
+                                $text .= _(" smaller");
+                            }
+                            $text .= " "._("than")." ". htmlspecialchars($rule['cond'][$i]['sizeamount']) .
+                                " ". htmlspecialchars($rule['cond'][$i]['sizeunit']) . "</em>, ";
+                            $terse .= $rule['cond'][$i]['sizeamount'];
+                            $out .= $rule['cond'][$i]['sizeamount'];
                     
-                    if($rule['cond'][$i]['sizeunit']=="kb") {
-                        $out .= "K\n";
-                        $terse .= "K\n";
-                    } elseif($rule['cond'][$i]['sizeunit']=="mb") {
-                        $out .= "M\n";
-                        $terse .= "M\n";
-                    }
-                    break;
+                            if($rule['cond'][$i]['sizeunit']=="kb") {
+                                $out .= "K\n";
+                                $terse .= "K\n";
+                            } elseif($rule['cond'][$i]['sizeunit']=="mb") {
+                                $out .= "M\n";
+                                $terse .= "M\n";
+                            }
+                            break;
              
-                case 'body':
-                    $aTmp = build_rule_snippet('body', '', $rule['cond'][$i]['matchtype'], $rule['cond'][$i]['bodymatch']);
-                    $out .= $aTmp[0];
-                    $text .= $aTmp[1];
-                    $terse .= $aTmp[2];
-                    break;
+                        case 'body':
+                            $aTmp = build_rule_snippet('body', '', $rule['cond'][$i]['matchtype'], $rule['cond'][$i]['bodymatch']);
+                            $out .= $aTmp[0];
+                            $text .= $aTmp[1];
+                            $terse .= $aTmp[2];
+                            break;
                 
-                case 'datetime':
-                    include_once(SM_PATH . 'plugins/avelsieve/include/avelsieve_condition_datetime.class.php');
-                    $myCondition = new avelsieve_condition_datetime($sieve, $rule, $i, 'date');
-                    $aTmp = $myCondition->generate_sieve();
+                        case 'datetime':
+                            include_once(SM_PATH . 'plugins/avelsieve/include/avelsieve_condition_datetime.class.php');
+                            $myCondition = new avelsieve_condition_datetime($sieve, $rule, $i, 'date');
+                            $aTmp = $myCondition->generate_sieve();
 
-                    $out .= $aTmp[0];
-                    $text .= $aTmp[1];
-                    $terse .= $aTmp[2];
-                    break;
+                            $out .= $aTmp[0];
+                            $text .= $aTmp[1];
+                            $terse .= $aTmp[2];
+                            break;
 
-                case 'all':
-                    $out .= 'true';
-                    $text .= _("For <strong>ALL</strong> incoming messages; ");
-                    $terse .= _("ALL");
-                    break;
-                }
+                        case 'all':
+                            $out .= 'true';
+                            $text .= _("For <strong>ALL</strong> incoming messages; ");
+                            $terse .= _("ALL");
+                            break;
+                    } // end of switch
+                } // end of if
 
             } elseif(isset($rule['cond'][$i]['kind']) && $rule['cond'][$i]['kind'] == 'datetime') {
                 include_once(SM_PATH . 'plugins/avelsieve/include/avelsieve_condition_datetime.class.php');

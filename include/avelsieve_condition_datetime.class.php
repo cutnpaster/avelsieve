@@ -52,8 +52,8 @@ class avelsieve_condition_datetime extends avelsieve_condition {
      * @param string $test Which test to use / build UI for? 'currentdate' or 'date'
      * @return void
      */
-    function __construct(&$s, $rule, $n, $test = 'currentdate') {
-        parent::__construct(&$s, $rule, $n);
+    function __construct($s, $rule, $n, $test = 'currentdate') {
+        parent::__construct($s, $rule, $n, $test = 'currentdate');
 
         if($test == 'currentdate') {
             $this->test = 'currentdate';
@@ -352,6 +352,7 @@ class avelsieve_condition_datetime extends avelsieve_condition {
      */
     public function generate_sieve() {
         $c = &$this->data;
+        $cmp = false;
 
         $out = $text = $terse = '';
         $out .= ' ' . $this->test . ' ';

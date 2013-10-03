@@ -867,7 +867,7 @@ class avelsieve_html_edit extends avelsieve_html {
                 case 'message':
 
                     foreach($match_vars as $m) {
-                        if(!empty($c[$m]) || $c['type'] == 'all') {
+                        if(!empty($c[$m]) || (!empty($c['type']) && $c['type'] == 'all')) {
                             $new_cond_indexes[] = $n;
                         }
                     }

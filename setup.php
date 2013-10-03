@@ -31,10 +31,9 @@ function squirrelmail_plugin_init_avelsieve() {
     $squirrelmail_plugin_hooks['configtest']['avelsieve'] = 'avelsieve_configtest';
     
     $squirrelmail_plugin_hooks['right_main_after_header']['avelsieve'] = 'avelsieve_right_main';
-    
-    $squirrelmail_plugin_hooks['javascript_libs_register']['avelsieve'] = 'avelsieve_register_jslibs';
 
     $squirrelmail_plugin_hooks['generic_header']['avelsieve'] = 'avelsieve_generic_header';
+    $squirrelmail_plugin_hooks['javascript_libs_register']['avelsieve'] = 'avelsieve_register_jslibs';
 
     $squirrelmail_plugin_hooks['special_mailbox']['avelsieve'] = 'junkmail_markspecial';
     $squirrelmail_plugin_hooks['folders_bottom']['avelsieve'] = 'junkmail_folders';
@@ -153,7 +152,7 @@ function avelsieve_generic_header() {
 
     if(stristr(basename($PHP_SELF), 'edit.php')) {
         // Edit page (edit.php)
-        $js = array('avelsieve_common.js', 'avelsieve_edit.js', 'prototype-base-extensions.js', 'prototype-date-extensions.js', 'datepicker.js');
+        $js = array('prototype.js', 'avelsieve_common.js', 'avelsieve_edit.js', 'prototype-base-extensions.js', 'prototype-date-extensions.js', 'datepicker.js');
         echo "\n".'<link rel="stylesheet" type="text/css" href="'.$base_uri.'plugins/avelsieve/styles/datepicker.css"></link>' . "\n";
 
     } elseif(stristr(basename($PHP_SELF), 'table.php')) {
@@ -165,6 +164,7 @@ function avelsieve_generic_header() {
         foreach($js as $j) {
             echo "\n".'<script language="JavaScript" type="text/javascript" src="'.$base_uri.'plugins/avelsieve/javascripts/'.$j.'"></script>';
         }
+        echo "\n";
     }
 }
 
@@ -181,7 +181,7 @@ function junkmail_markspecial($box) {
     if($box == 'Junk' || $box == 'INBOX.Junk') {
         return true;
     }
-    $parts = split(str_replace('.', '\.',$delimiter), $box);
+    $parts = preg_split('/'.str_replace('.', '\.',$delimiter).'/', $box);
     if(sizeof($parts) > 1 && ($parts[0] == 'Junk' || $parts[1] == 'Junk')) {
         return true;
     }
@@ -226,8 +226,8 @@ function avelsieve_configtest() {
 function avelsieve_register_jslibs() {
     global $plugins;
     if(in_array('javascript_libs', $plugins)) {
-        javascript_libs_register('plugins/avelsieve/table.php', array('prototype-1.6.0.3/prototype.js', 'scriptaculous-1.8.1/effects.js'));
-        javascript_libs_register('plugins/avelsieve/edit.php', array('prototype-1.6.0.3/prototype.js', 'scriptaculous-1.8.1/effects.js'));
+        javascript_libs_register('plugins/avelsieve/table.php', array('scriptaculous-1.8.1/effects.js'));
+        javascript_libs_register('plugins/avelsieve/edit.php', array('scriptaculous-1.8.1/effects.js'));
     }
 }
 
@@ -238,7 +238,7 @@ function avelsieve_register_jslibs() {
 function avelsieve_info() {
    return array(
        'english_name' => 'Avelsieve - Sieve Mail Filters',
-       'version' => '1.9.9',
+       'version' => '1.9.9.1',
        'summary' => 'An easy user interface for creating Sieve scripts on a Sieve-compliant (RFC 5028) server.',
        'details' => 'Avelsieve - Sieve Mail Filters for Squirrelmail - allows editing of Sieve mail filtering scripts on a Sieve-compliant (RFC 5028) server.'
    );
